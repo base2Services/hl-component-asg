@@ -1,0 +1,34 @@
+maximum_availability_zones: 5
+
+security_groups:
+  SecurityGroupBastion:
+    ports:
+      - from: 22
+        to: 22
+      - from: 80
+
+iam_policies:
+  - associate-address
+  - ec2-describe
+  - cloudwatch-logs
+  - ssm
+
+public_address: false
+
+health_check_grace_period: 500
+
+asg_update_policy:
+  min: 0
+  batch_size: 1
+  suspend:
+    - HealthCheck
+    - ReplaceUnhealthy
+    - AZRebalance
+    - AlarmNotification
+    - ScheduledActions
+
+user_data: | 
+  "#!/bin/bash"
+  hostname ${EnvironmentName}-bastion-`/opt/aws/bin/ec2-metadata --instance-id|/usr/bin/awk '{print $2}'`
+  sed '/HOSTNAME/d' /etc/sysconfig/network > /tmp/network && mv -f /tmp/network /etc/sysconfig/network && echo "HOSTNAME=${EnvironmentName}-`/opt/aws/bin/ec2-metadata --instance-id|/usr/bin/awk '{print $2}'`" >>/etc/sysconfig/network && /etc/init.d/network restart
+
