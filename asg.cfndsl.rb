@@ -4,16 +4,17 @@ CloudFormation do
 
   safe_component_name = component_name.capitalize.gsub('_','').gsub('-','')
 
-  tags = []
-  tags << { Key: 'Environment', Value: Ref(:EnvironmentName)}
-  tags << { Key: 'EnvironmentType', Value: Ref(:EnvironmentType)}
+  sg_tags = []
+  sg_tags << { Key: 'Environment', Value: Ref(:EnvironmentName)}
+  sg_tags << { Key: 'EnvironmentType', Value: Ref(:EnvironmentType)}
+  sg_tags << { Key: 'Name', Value: FnSub("${EnvironmentName}-#{component_name}")}
 
-  extra_tags.each { |key,value| asg_ecs_extra_tags << { Key: "#{key}", Value: value } } if defined? extra_tags
+  extra_tags.each { |key,value| sg_tags << { Key: "#{key}", Value: FnSub(value) } } if defined? extra_tags
 
   EC2_SecurityGroup("SecurityGroup#{safe_component_name}") do
     GroupDescription FnSub("${EnvironmentName}-#{component_name}")
     VpcId Ref('VPCId')
-    Tags tags + [{key: 'Name', value: FnSub("${EnvironmentName}-#{component_name}")}]
+    Tags sg_tags
   end
 
   security_groups.each do |name, sg|
@@ -55,14 +56,14 @@ CloudFormation do
     UserData FnBase64(FnSub(user_data))
   end
 
-
   asg_tags = []
   asg_tags << { Key: 'Environment', Value: Ref(:EnvironmentName), PropagateAtLaunch: true }
   asg_tags << { Key: 'EnvironmentType', Value: Ref(:EnvironmentType), PropagateAtLaunch: true }
   asg_tags << { Key: 'Name', Value: FnJoin('-', [ Ref(:EnvironmentName), component_name, 'xx' ]), PropagateAtLaunch: true }
   asg_tags << { Key: 'Role', Value: component_name, PropagateAtLaunch: true }
 
-  asg_extra_tags.each { |key,value| asg_ecs_extra_tags << { Key: "#{key}", Value: value, PropagateAtLaunch: true } } if defined? asg_extra_tags
+  extra_tags.each { |key,value| asg_tags << { Key: "#{key}", Value: FnSub(value), PropagateAtLaunch: true } } if defined? extra_tags
+  asg_extra_tags.each { |key,value| asg_tags << { Key: "#{key}", Value: FnSub(value), PropagateAtLaunch: true } } if defined? asg_extra_tags
 
   asg_loadbalancers = []
   loadbalancers.each {|lb| asg_loadbalancers << Ref(lb)} if defined? loadbalancers
