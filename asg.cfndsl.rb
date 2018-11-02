@@ -56,17 +56,19 @@ CloudFormation do
   end
 
 
-  asg_tags = tags.each {|tag| tag[:PropagateAtLaunch] = true}
+  asg_tags = []
+  asg_tags << { Key: 'Environment', Value: Ref(:EnvironmentName), PropagateAtLaunch: true }
+  asg_tags << { Key: 'EnvironmentType', Value: Ref(:EnvironmentType), PropagateAtLaunch: true }
   asg_tags << { Key: 'Name', Value: FnJoin('-', [ Ref(:EnvironmentName), component_name, 'xx' ]), PropagateAtLaunch: true }
-  asg_tags << { Key: 'Role', Value: component, PropagateAtLaunch: true }
+  asg_tags << { Key: 'Role', Value: component_name, PropagateAtLaunch: true }
 
   asg_extra_tags.each { |key,value| asg_ecs_extra_tags << { Key: "#{key}", Value: value, PropagateAtLaunch: true } } if defined? asg_extra_tags
 
   asg_loadbalancers = []
-  loadbalancers.each {|lb| asg_loadbalancers << Ref(lb)}
+  loadbalancers.each {|lb| asg_loadbalancers << Ref(lb)} if defined? loadbalancers
 
   asg_targetgroups = []
-  targetgroups.each {|lb| asg_targetgroups << Ref(lb)}
+  targetgroups.each {|lb| asg_targetgroups << Ref(lb)} if defined? targetgroups
 
   AutoScalingGroup('AutoScaleGroup') do
     AutoScalingGroupName name if defined? name
