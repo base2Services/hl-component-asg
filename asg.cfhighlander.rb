@@ -21,6 +21,16 @@ CfhighlanderTemplate do
     ComponentParam 'KeyName'
     ComponentParam 'MinSize'
     ComponentParam 'MaxSize'
+    ComponentParam 'HealthCheckType', 'EC2', allowedValues: ['EC2','ELB']
+
+    loadbalancers.each do |lb|
+      ComponentParam lb
+    end if defined? loadbalancers
+
+    targetgroups.each do |tg|
+      ComponentParam tg
+    end if defined? targetgroups
+
   end
 
 end

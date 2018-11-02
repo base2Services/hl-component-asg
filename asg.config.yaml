@@ -8,10 +8,17 @@ security_groups:
       - from: 80
 
 iam_policies:
-  - associate-address
-  - ec2-describe
-  - cloudwatch-logs
-  - ssm
+  loadbalancer-manage:
+    action:
+      - ec2:AuthorizeSecurityGroupIngress
+      - elasticloadbalancing:DeregisterInstancesFromLoadBalancer
+      - elasticloadbalancing:DeregisterTargets
+      - elasticloadbalancing:Describe*
+      - elasticloadbalancing:RegisterInstancesWithLoadBalancer
+      - elasticloadbalancing:RegisterTargets
+  ec2-describe:
+    action:
+      - ec2:Describe*
 
 public_address: false
 
@@ -27,8 +34,15 @@ asg_update_policy:
     - AlarmNotification
     - ScheduledActions
 
-user_data: | 
+user_data: |
   "#!/bin/bash"
   hostname ${EnvironmentName}-bastion-`/opt/aws/bin/ec2-metadata --instance-id|/usr/bin/awk '{print $2}'`
   sed '/HOSTNAME/d' /etc/sysconfig/network > /tmp/network && mv -f /tmp/network /etc/sysconfig/network && echo "HOSTNAME=${EnvironmentName}-`/opt/aws/bin/ec2-metadata --instance-id|/usr/bin/awk '{print $2}'`" >>/etc/sysconfig/network && /etc/init.d/network restart
 
+## Exectued in the order provided
+termination_policies:
+  - Default
+  # - OldestInstance
+  # - NewestInstance
+  # - OldestLaunchConfiguration
+  # - ClosestToNextInstanceHour
