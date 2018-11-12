@@ -36,7 +36,7 @@ CloudFormation do
   end if defined? iam_policies
 
   Role('Role') do
-    AssumeRolePolicyDocument service_role_assume_policy('ec2')
+    AssumeRolePolicyDocument service_role_assume_policy(['ec2','ssm'])
     Path '/'
     Policies(policies)
   end
