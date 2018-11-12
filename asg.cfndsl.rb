@@ -62,8 +62,8 @@ CloudFormation do
   asg_tags << { Key: 'Name', Value: FnJoin('-', [ Ref(:EnvironmentName), component_name, 'xx' ]), PropagateAtLaunch: true }
   asg_tags << { Key: 'Role', Value: component_name, PropagateAtLaunch: true }
 
-  extra_tags.each { |key,value| asg_tags << { Key: "#{key}", Value: FnSub(value), PropagateAtLaunch: true } } if defined? extra_tags
-  asg_extra_tags.each { |key,value| asg_tags << { Key: "#{key}", Value: FnSub(value), PropagateAtLaunch: true } } if defined? asg_extra_tags
+  extra_tags.each { |key,value| asg_tags.unshift({ Key: "#{key}", Value: FnSub(value), PropagateAtLaunch: true }) } if defined? extra_tags
+  asg_extra_tags.each { |key,value| asg_tags.unshift({ Key: "#{key}", Value: FnSub(value), PropagateAtLaunch: true }) } if defined? asg_extra_tags
 
   asg_loadbalancers = []
   loadbalancers.each {|lb| asg_loadbalancers << Ref(lb)} if defined? loadbalancers
@@ -89,7 +89,7 @@ CloudFormation do
     TargetGroupARNs asg_targetgroups if asg_targetgroups.any?
     TerminationPolicies termination_policies
     VPCZoneIdentifier az_conditional_resources('SubnetCompute', maximum_availability_zones)
-    Tags asg_tags
+    Tags asg_tags.uniq { |h| h[:Key] }
   end
 
   Output("SecurityGroup#{safe_component_name}", Ref("SecurityGroup#{safe_component_name}"))
