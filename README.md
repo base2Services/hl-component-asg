@@ -1,4 +1,4 @@
-![build-status](https://travis-ci.com/theonestack/hl-component-asg-proxy.svg?branch=master)
+[![Build Status](https://travis-ci.org/theonestack/hl-component-asg.svg?branch=master)](https://travis-ci.org/theonestack/hl-component-asg)
 
 ### Cfhighlander Autoscaling Group component
 
