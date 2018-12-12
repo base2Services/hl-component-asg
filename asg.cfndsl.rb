@@ -46,9 +46,18 @@ CloudFormation do
     Roles [Ref('Role')]
   end
 
+  volumes = []
+  volumes << {
+    DeviceName: '/dev/xvda',
+    Ebs: {
+      VolumeSize: volume_size
+    }
+  } if defined? volume_size
+
   LaunchConfiguration('LaunchConfig') do
     ImageId Ref('Ami')
     InstanceType Ref('InstanceType')
+    BlockDeviceMappings volumes if defined? volume_size
     AssociatePublicIpAddress public_address
     IamInstanceProfile Ref('InstanceProfile')
     KeyName Ref('KeyName')
