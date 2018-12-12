@@ -10,18 +10,23 @@ CfhighlanderTemplate do
     ComponentParam 'NetworkPrefix', isGlobal: true
     ComponentParam 'StackOctet', isGlobal: true
     ComponentParam 'VPCId', type: 'AWS::EC2::VPC::Id'
-    maximum_availability_zones.times do |az|
-      ComponentParam "SubnetCompute#{az}"
-    end
-    security_groups.each do |name, sg|
-      ComponentParam name
-    end if defined? security_groups
-    ComponentParam 'Ami'
+    ComponentParam 'Ami', type: 'AWS::EC2::Image::Id'
     ComponentParam 'InstanceType'
     ComponentParam 'KeyName'
     ComponentParam 'MinSize'
     ComponentParam 'MaxSize'
     ComponentParam 'HealthCheckType', 'EC2', allowedValues: ['EC2','ELB']
+    
+    maximum_availability_zones.times do |az|
+      ComponentParam "SubnetCompute#{az}"
+    end
+    security_groups.each do |name, sg|
+      ComponentParam name, type: 'AWS::EC2::SecurityGroup::Id'
+    end if defined? security_groups
+
+    if defined?(ecs_autoscale)
+      ComponentParam 'EnableScaling', 'false', allowedValues: ['true','false']
+    end
 
     loadbalancers.each do |lb|
       ComponentParam lb
