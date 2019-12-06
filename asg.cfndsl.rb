@@ -11,6 +11,8 @@ CloudFormation do
 
   extra_tags.each { |key,value| sg_tags << { Key: "#{key}", Value: FnSub(value) } } if defined? extra_tags
 
+  Condition("SpotPriceSet", FnNot(FnEquals(Ref('SpotPrice'), '')))
+
   EC2_SecurityGroup("SecurityGroup#{safe_component_name}") do
     GroupDescription FnSub("${EnvironmentName}-#{component_name}")
     VpcId Ref('VPCId')
@@ -61,6 +63,7 @@ CloudFormation do
     AssociatePublicIpAddress public_address
     IamInstanceProfile Ref('InstanceProfile')
     KeyName Ref('KeyName')
+    SpotPrice FnIf('SpotPriceSet', Ref('SpotPrice'), Ref('AWS::NoValue'))
     SecurityGroups [ Ref("SecurityGroup#{safe_component_name}") ]
     UserData FnBase64(FnSub(user_data))
   end

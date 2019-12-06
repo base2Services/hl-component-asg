@@ -15,6 +15,7 @@ CfhighlanderTemplate do
     ComponentParam 'KeyName'
     ComponentParam 'MinSize'
     ComponentParam 'MaxSize'
+    ComponentParam 'SpotPrice', ''
     ComponentParam 'HealthCheckType', 'EC2', allowedValues: ['EC2','ELB']
     
     maximum_availability_zones.times do |az|
