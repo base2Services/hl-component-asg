@@ -1,0 +1,10 @@
+test_metadata:
+  type: config
+  name: auto_scaling
+  description: test the memory scaling resources
+
+# ecs_autoscale:
+#   scale_up_adjustment: 2
+#   scale_down_adjustment: -1
+#   memory_high: 70
+#   memory_low: 30
