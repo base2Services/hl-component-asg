@@ -1,0 +1,6 @@
+test_metadata:
+  type: config
+  name: volume
+  description: set the root volume size
+
+volume_size: 20
